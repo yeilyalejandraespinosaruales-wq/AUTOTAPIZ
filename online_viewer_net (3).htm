@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>AUTOTAPIZ - Diseña tu Forro de Auto</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Librerías necesarias -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(120deg, #1e3c72, #8a2be2);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+    .card {
+      background-color: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(14px);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 950px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    h1 {
+      text-align: center;
+      font-weight: 600;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    h2.empresa {
+      text-align: center;
+      font-size: 1.4em;
+      font-weight: 400;
+      margin-bottom: 30px;
+      color: #ffd700;
+      letter-spacing: 2px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .full-width {
+      grid-column: 1 / -1;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      background-color: rgba(255,255,255,0.85);
+      color: #333;
+    }
+    input[type="color"] {
+      height: 50px;
+      padding: 0;
+    }
+    button {
+      margin-top: 30px;
+      padding: 14px 28px;
+      background-color: #ffffff;
+      color: #1e3c72;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #e0e0e0;
+    }
+    #preview {
+      background-color: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 30px;
+    }
+    #preview img {
+      width: 30%;
+      margin: 10px;
+      border-radius: 10px;
+    }
+    .color-box {
+      display: inline-block;
+      width: 25px;
+      height: 25px;
+      border-radius: 5px;
+      border: 1px solid #000;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Diseña tu Forro de Auto</h1>
+    <h2 class="empresa">AUTOTAPIZ</h2>
+
+    <form id="formulario" class="grid">
+      <div class="full-width">
+        <label for="nombre">Nombre completo del cliente:</label>
+        <input type="text" id="nombre" placeholder="Ej: Juan Pérez">
+      </div>
+      <div>
+        <label for="cedula">Cédula o documento:</label>
+        <input type="text" id="cedula" placeholder="Ej: 1234567890">
+      </div>
+      <div>
+        <label for="telefono">Teléfono:</label>
+        <input type="tel" id="telefono" placeholder="Ej: 3001234567">
+      </div>
+      <div>
+        <label for="email">Correo electrónico:</label>
+        <input type="email" id="email" placeholder="Ej: cliente@email.com">
+      </div>
+      <div>
+        <label for="marca">Marca del vehículo:</label>
+        <input type="text" id="marca" placeholder="Ej: Toyota, Chevrolet, Renault">
+      </div>
+      <div>
+        <label for="modelo">Modelo del vehículo:</label>
+        <input type="text" id="modelo" placeholder="Ej: Corolla, Duster, Spark">
+      </div>
+      <div>
+        <label for="año">Año del vehículo:</label>
+        <input type="number" id="año" min="1980" max="2025">
+      </div>
+      <div>
+        <label for="color1">Color principal:</label>
+        <input type="color" id="color1">
+      </div>
+      <div>
+        <label for="color2">Color secundario:</label>
+        <input type="color" id="color2">
+      </div>
+      <div>
+        <label for="color3">Color de costuras:</label>
+        <input type="color" id="color3">
+      </div>
+      <div class="full-width">
+        <button type="button" id="btnPropuesta">Generar propuesta (PDF)</button>
+      </div>
+    </form>
+
+    <div id="preview" style="display:none;">
+      <h2>Propuesta de Diseño - AUTOTAPIZ</h2>
+      <div id="preview-content"></div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("btnPropuesta").addEventListener("click", async () => {
+      const nombre = document.getElementById("nombre").value || "No especificado";
+      const cedula = document.getElementById("cedula").value || "No especificado";
+      const telefono = document.getElementById("telefono").value || "No especificado";
+      const email = document.getElementById("email").value || "No especificado";
+      const marca = document.getElementById("marca").value || "No especificado";
+      const modelo = document.getElementById("modelo").value || "No especificado";
+      const año = document.getElementById("año").value || "No especificado";
+      const color1 = document.getElementById("color1").value;
+      const color2 = document.getElementById("color2").value;
+      const color3 = document.getElementById("color3").value;
+
+      const previewContent = document.getElementById("preview-content");
+      previewContent.innerHTML = `
+        <p><strong>Cliente:</strong> ${nombre} (${cedula})</p>
+        <p><strong>Teléfono:</strong> ${telefono}</p>
+        <p><strong>Correo:</strong> ${email}</p>
+        <p><strong>Vehículo:</strong> ${marca} ${modelo} (${año})</p>
+
+        <h3>Colores seleccionados:</h3>
+        <p><span class="color-box" style="background:${color1};"></span> Principal: ${color1}</p>
+        <p><span class="color-box" style="background:${color2};"></span> Secundario: ${color2}</p>
+        <p><span class="color-box" style="background:${color3};"></span> Costuras: ${color3}</p>
+
+        <h3>Propuestas:</h3>
+        <ul>
+          <li>Forro en tono principal ${color1}, detalles en ${color2}, costuras ${color3}</li>
+          <li>Forro en ${color2}, franjas ${color3} y base ${color1}</li>
+          <li>Diseño deportivo con ${color3} dominante, acentos ${color1}, bordes ${color2}</li>
+        </ul>
+        <div>
+          <img src="https://i.ibb.co/VQJ7P3x/asiento-auto1.jpg" alt="Asiento 1">
+          <img src="https://i.ibb.co/88HgwtJ/asiento-auto2.jpg" alt="Asiento 2">
+          <img src="https://i.ibb.co/1qCK5hW/asiento-auto3.jpg" alt="Asiento 3">
+        </div>
+      `;
+      document.getElementById("preview").style.display = "block";
+
+      const element = document.getElementById("preview");
+      const canvas = await html2canvas(element, { scale: 2 });
+      const imgData = canvas.toDataURL("image/png");
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p", "mm", "a4");
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Propuesta_${nombre}.pdf`);
+    });
+  </script>
+</body>
+</html>
